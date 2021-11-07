@@ -171,6 +171,25 @@ const App = () => {
     </button>
   );
 
+  const sendTip = async (toWallet, amount) => {
+    try {
+      const provider = getProvider();
+      const program = new Program(idl, programID, provider);
+      const lamports = new BN(amount * 1000000000);
+      console.log(lamports, toWallet);
+      await program.rpc.tipUser(lamports, {
+        accounts: {
+          fromUser: provider.wallet.publicKey,
+          toUser: toWallet,
+          systemProgram: SystemProgram.programId,
+        },
+      });
+      console.log("Tip sent: ", amount);
+    } catch (error) {
+      console.log("Error sending Tip", error);
+    }
+  };
+
   const renderDisconnectContainer = () => (
     <button
       className='cta-button connect-wallet-button'
@@ -223,6 +242,10 @@ const App = () => {
                 key={index}
               >
                 <img src={item.gifLink} />
+                <div style={{ color: "white", marginTop: "5px" }}>
+                  User:
+                  {shortenAddress(item.userAddress.toString())}
+                </div>
                 <div
                   style={{
                     color: "white",
@@ -233,11 +256,36 @@ const App = () => {
                     marginTop: "15px",
                   }}
                 >
-                  <div>
-                    User:
-                    {shortenAddress(item.userAddress.toString())}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      // padding: "50px, 5px",
+                      // border: "1px solid grey",
+                    }}
+                  >
+                    <div style={{ marginRight: "10px" }}>Tip SOL</div>
+                    <div
+                      className='upvote-container'
+                      onClick={() => sendTip(item.userAddress.toString(), 0.05)}
+                    >
+                      0.05
+                    </div>
+                    <div
+                      className='upvote-container'
+                      onClick={() => sendTip(item.userAddress.toString(), 0.01)}
+                    >
+                      0.01
+                    </div>
+                    <div
+                      className='upvote-container'
+                      onClick={() =>
+                        sendTip(item.userAddress.toString(), 0.005)
+                      }
+                    >
+                      0.005
+                    </div>
                   </div>
-                  <div>Tip</div>
                   <div style={{ display: "flex", alignItems: "center" }}>
                     <div
                       className='upvote-container'
@@ -297,7 +345,7 @@ const App = () => {
           {!walletAddress && renderNotConnectedContainer()}
           {walletAddress && renderConnectedContainer()}
         </div>
-        <div className='footer-container'>
+        {/* <div className='footer-container'>
           <img alt='Twitter Logo' className='twitter-logo' src={twitterLogo} />
           <a
             className='footer-text'
@@ -305,7 +353,7 @@ const App = () => {
             target='_blank'
             rel='noreferrer'
           >{`built on @${TWITTER_HANDLE}`}</a>
-        </div>
+        </div> */}
       </div>
     </div>
   );
